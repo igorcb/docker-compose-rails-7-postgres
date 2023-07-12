@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:14-alpine'
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "54322:5432"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "john@doe.com"
+      PGADMIN_DEFAULT_PASSWORD: "PgAdmin@2023"
+    ports:
+      - "5051:80"
+    depends_on:
+      - postgres
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle && bundle exec rails s -p 3000 -b 0.0.0.0"
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres:
+#  redis:
